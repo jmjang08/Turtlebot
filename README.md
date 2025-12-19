@@ -3,7 +3,7 @@ Rokey BootCamp Turtlebot projects, 2025.11.10 ~ 2025.11.21
 
 ## Overview
 
-**Two Cops** is a multi-robot tracking project in which **two TurtleBot4 robots equipped with depth cameras collaboratively track a moving RC car** in an indoor environment.
+**Two Cops** is a multi-robot tracking project in which **two TurtleBot4 robots equipped with depth cameras(OAK-D) and LIDAR sensor collaboratively track a moving RC car** in an indoor environment.
 
 Each TurtleBot independently performs:
 
