@@ -9,11 +9,8 @@ from launch.actions import (
 from launch.substitutions import LaunchConfiguration
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-
 from launch_ros.actions import Node
-
 from ament_index_python.packages import get_package_share_directory
-
 import os
 
 
@@ -61,7 +58,7 @@ def generate_launch_description():
         description='YOLO model path for turtlebot4_tracking',
     )
 
-    # ================== 실제 액션 구성 ==================
+    # ================== Actual Action Configuration ==================
     def launch_setup(context, *args, **kwargs):
         robot_id = LaunchConfiguration('robot_id').perform(context)
         partner_robot_id = LaunchConfiguration('partner_robot_id').perform(context)
@@ -71,10 +68,10 @@ def generate_launch_description():
         initial_pose_file = LaunchConfiguration('initial_pose_file').perform(context)
         tracking_model_path = LaunchConfiguration('tracking_model_path').perform(context)
 
-        ns_full = f'/robot{robot_id}'   # 예: /robot1
-        ns_plain = f'robot{robot_id}'   # 예: robot1
+        ns_full = f'/robot{robot_id}'   # e.g., /robot1
+        ns_plain = f'robot{robot_id}'   # e.g., robot1
 
-        # ---- 1) initial pose 파일 읽기 ----
+        # ---- 1) Read initial pose file ----
         try:
             with open(initial_pose_file, 'r') as f:
                 content = f.read().strip()
@@ -87,7 +84,7 @@ def generate_launch_description():
             print(f"[twocops_bringup] Error: {e}")
             initial_x, initial_y, initial_yaw = '0.0', '0.0', '0.0'
 
-        # ---- 2) Step1: DOCK 상태 체크 & 필요 시 UNDOCK ----
+        # ---- 2) Step 1: Check DOCK status & UNDOCK if necessary ----
         dock_state_manager = Node(
             package='twocops_bringup',
             executable='dock_state_manager',
@@ -96,7 +93,7 @@ def generate_launch_description():
             parameters=[{'robot_id': int(robot_id)}],
         )
 
-        # ---- 3) Step2: prep_checker.sh 실행 (DockStateManager 종료 후) ----
+        # ---- 3) Step 2: Execute prep_checker.sh (after DockStateManager exits) ----
         prep_checker_script = os.path.expanduser('~/turtlebot4_ws/prep_checker.sh')
 
         prep_checker = ExecuteProcess(
@@ -104,7 +101,7 @@ def generate_launch_description():
             output='screen',
         )
 
-        # ---- 4) Step3: nav2pose.launch.py 실행 ----
+        # ---- 4) Step 3: Launch nav2pose.launch.py ----
         nav2pose_pkg_share = get_package_share_directory('turtlebot4_nav2pose')
         nav2pose_launch_path = os.path.join(
             nav2pose_pkg_share, 'launch', 'nav2pose.launch.py'
@@ -123,7 +120,7 @@ def generate_launch_description():
             }.items(),
         )
 
-        # ---- 5) Nav2ReadyWaiter: Nav2 액션 서버 준비될 때까지 대기 ----
+        # ---- 5) Nav2ReadyWaiter: Wait until Nav2 action servers are ready ----
         nav2_ready_waiter_node = Node(
             package='twocops_bringup',
             executable='nav2_ready_waiter',
@@ -135,7 +132,7 @@ def generate_launch_description():
             ],
         )
 
-        # ---- 6) Step4: tracking(yolo_move_robot.launch.py) 실행 ----
+        # ---- 6) Step 4: Launch tracking (yolo_move_robot.launch.py) ----
         tracking_pkg_share = get_package_share_directory('turtlebot4_tracking')
         tracking_launch_path = os.path.join(
             tracking_pkg_share, 'launch', 'yolo_move_robot.launch.py'
@@ -152,7 +149,7 @@ def generate_launch_description():
             }.items(),
         )
 
-        # ---- 7) Step5: TransitionManager 실행 ----
+        # ---- 7) Step 5: Launch TransitionManager ----
         transition_manager_node = Node(
             package='twocops_bringup',
             executable='transition_manager',
@@ -164,8 +161,8 @@ def generate_launch_description():
             ],
         )
 
-        # ---- 이벤트 체인 구성 ----
-        # 1) DockStateManager 종료 → prep_checker 실행
+        # ---- Event Chain Configuration ----
+        # 1) DockStateManager exit -> Run prep_checker
         event_after_dock = RegisterEventHandler(
             OnProcessExit(
                 target_action=dock_state_manager,
@@ -173,7 +170,7 @@ def generate_launch_description():
             )
         )
 
-        # 2) prep_checker 종료 → nav2pose.launch + nav2_ready_waiter 실행
+        # 2) prep_checker exit -> Launch nav2pose.launch + nav2_ready_waiter
         event_after_prep = RegisterEventHandler(
             OnProcessExit(
                 target_action=prep_checker,
@@ -181,7 +178,7 @@ def generate_launch_description():
             )
         )
 
-        # 3) nav2_ready_waiter 종료(= Nav2 준비 완료) → tracking + transition_manager 실행
+        # 3) nav2_ready_waiter exit (Nav2 Ready) -> Launch tracking + transition_manager
         event_after_nav2_ready = RegisterEventHandler(
             OnProcessExit(
                 target_action=nav2_ready_waiter_node,

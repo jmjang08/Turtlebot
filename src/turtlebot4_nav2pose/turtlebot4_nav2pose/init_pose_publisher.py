@@ -1,7 +1,6 @@
 # my_nav_utils/initial_pose_publisher.py
 
 import math
-
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -11,7 +10,7 @@ class InitialPosePublisher(Node):
     def __init__(self):
         super().__init__('initial_pose_publisher')
 
-        # 파라미터 선언
+        # Declare parameters
         self.declare_parameter('x', 0.0)
         self.declare_parameter('y', 0.0)
         self.declare_parameter('yaw', 0.0)
@@ -26,18 +25,18 @@ class InitialPosePublisher(Node):
         self.topic = self.get_parameter('topic').value
         self.publish_delay = float(self.get_parameter('publish_delay').value)
 
-        # initialpose 퍼블리셔
+        # Initial pose publisher
         self.pub = self.create_publisher(
             PoseWithCovarianceStamped,
             self.topic,
             10
         )
 
-        # 지정한 시간 뒤에 한 번만 퍼블리시
+        # Publish once after a specified delay
         self.timer = self.create_timer(self.publish_delay, self._publish_once)
 
         self.get_logger().info(
-            f'InitialPosePublisher 준비: topic={self.topic}, '
+            f'InitialPosePublisher initialized: topic={self.topic}, '
             f'frame_id={self.frame_id}, x={self.x}, y={self.y}, yaw={self.yaw}'
         )
 
@@ -46,31 +45,31 @@ class InitialPosePublisher(Node):
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = self.frame_id
 
-        # 위치
+        # Set Position
         msg.pose.pose.position.x = self.x
         msg.pose.pose.position.y = self.y
         msg.pose.pose.position.z = 0.0
 
-        # yaw → quaternion
+        # Convert yaw to quaternion
         half_yaw = self.yaw * 0.5
         msg.pose.pose.orientation.x = 0.0
         msg.pose.pose.orientation.y = 0.0
         msg.pose.pose.orientation.z = math.sin(half_yaw)
         msg.pose.pose.orientation.w = math.cos(half_yaw)
 
-        # 대충 AMCL 기본 수준의 covariance (x, y, yaw)
+        # Set standard AMCL-level covariance (x, y, yaw)
         cov = [0.0] * 36
-        cov[0] = 0.25   # x
-        cov[7] = 0.25   # y
-        cov[35] = 0.0685  # yaw
+        cov[0] = 0.25   # Variance for x
+        cov[7] = 0.25   # Variance for y
+        cov[35] = 0.0685  # Variance for yaw
         msg.pose.covariance = cov
 
         self.pub.publish(msg)
         self.get_logger().info(
-            f'초기 포즈 publish 완료: ({self.x:.3f}, {self.y:.3f}, yaw={self.yaw:.3f} rad)'
+            f'Initial pose published: ({self.x:.3f}, {self.y:.3f}, yaw={self.yaw:.3f} rad)'
         )
 
-        # 타이머 중지 (한 번만 쏘고 끝)
+        # Stop timer (publish only once)
         self.timer.cancel()
 
 

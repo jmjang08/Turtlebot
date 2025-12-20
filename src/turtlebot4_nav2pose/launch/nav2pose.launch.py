@@ -20,7 +20,7 @@ def generate_launch_description():
     initial_y = LaunchConfiguration('initial_y')
     initial_yaw = LaunchConfiguration('initial_yaw')  # rad
 
-    # --- Launch arguments 선언 ---
+    # --- Declare Launch Arguments ---
     declare_namespace = DeclareLaunchArgument(
         'namespace',
         default_value='/robot1',
@@ -63,7 +63,7 @@ def generate_launch_description():
         description='Initial yaw (rad) in map frame',
     )
 
-    # ===== 1) localization.launch.py include =====
+    # ----- 1) Include localization.launch.py -----
     localization_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([
@@ -79,8 +79,8 @@ def generate_launch_description():
         }.items(),
     )
 
-    # ===== 2) initial pose publisher =====
-    # namespace가 걸린 상태에서 topic="initialpose" 로 퍼블리시 → /robot1/initialpose
+    # ----- 2) Initial pose publisher -----
+    # Publishes to "initialpose" under the given namespace -> e.g., /robot1/initialpose
     initial_pose_node = Node(
         package='turtlebot4_nav2pose',
         executable='init_pose_publisher',
@@ -93,17 +93,17 @@ def generate_launch_description():
             'yaw': initial_yaw,
             'frame_id': 'map',
             'topic': 'initialpose',
-            'publish_delay': 3.0,  # AMCL가 완전히 뜨도록 약간 기다렸다가 쏘는 시간 (초)
+            'publish_delay': 3.0,  # Wait time (seconds) to ensure AMCL is fully active before publishing
         }],
     )
 
-    # 혹시 localization이 뜨는 데 시간이 좀 더 필요하면 TimerAction 으로
+    # Use TimerAction if localization needs more time to initialize
     delayed_initial_pose = TimerAction(
-        period=5.0,  # launch 시작 후 3초 뒤에 노드 시작
+        period=5.0,  # Start the node 5 seconds after launch begins
         actions=[initial_pose_node],
     )
 
-    # ===== 3) nav2.launch.py include =====
+    # ----- 3) Include nav2.launch.py -----
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([
