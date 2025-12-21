@@ -1,35 +1,30 @@
-# Two Cops
-Rokey BootCamp Turtlebot projects, 2025.11.10 ~ 2025.11.21
+# 🚔 Two Cops
 
-## Overview
+**Rokey BootCamp Turtlebot projects** 2025.11.10 ~ 2025.11.21
 
-**Two Cops** is a multi-robot tracking project in which **two TurtleBot4 robots equipped with depth cameras(OAK-D) and LIDAR sensor collaboratively track a moving RC car** in an indoor environment.
+## 📝 Overview
+
+**Two Cops** is a multi-robot tracking project. It features **two TurtleBot4 robots equipped with depth cameras (OAK-D) and LIDAR sensors that collaboratively track a moving RC car** in an indoor environment.
 
 Each TurtleBot independently performs:
 
-* **Object detection** using a YOLO-based model
-* **3D position estimation** of the RC car using RGB–Depth data
-* **Navigation and motion control** via ROS 2 Nav2 stack
+* 🔍 **Object detection**: Using a YOLO-based model.
+* 📍 **3D position estimation**: Calculating the RC car's position using RGB–Depth data.
+* 🚀 **Navigation and motion control**: Powered by the ROS 2 Nav2 stack.
 
-The system is designed so that each robot operates under its own ROS 2 namespace (`/robot1`, `/robot2`), allowing scalable multi-robot deployment without topic or TF conflicts.
-
-Typical use cases include:
-
-* Multi-agent pursuit / surveillance scenarios
-* Cooperative mobile robot perception
-* Vision-based dynamic target tracking with depth cameras
+The system is designed with independent ROS 2 namespaces (`/robot1`, `/robot2`), allowing for scalable multi-robot deployment without topic or TF conflicts.
 
 ---
 
-## System Architecture
+## 🏗️ System Architecture
 
-**Hardware**
+**💻 Hardware**
 
 * TurtleBot4 × 2
 * Onboard OAK-D (RGB + Depth camera)
-* Red rc-car (target object)
+* Red RC-car (Target object)
 
-**Software**
+**⚙️ Software**
 
 * ROS2 Humble
 * Nav2 (Localization + Navigation)
@@ -37,63 +32,47 @@ Typical use cases include:
 * Custom tracking & motion node
 * RViz2 for visualization
 
-**Key Concepts**
+**🧠 Key Concepts**
 
-* Namespaced robots (`/robot<n>`)   # n: 1 & 2
+* Namespaced robots (`/robot<n>`)
 * Map-based localization (AMCL)
 * Goal-based navigation (`NavToPose`)
 * Vision-driven tracking loop
 
 ---
 
-## Get started
+## 🚀 Get Started
 
-### Prerequisites
+### 📋 Prerequisites
 
-Before running this project, make sure:
+Before running this project, ensure the following:
 
-* ROS2 Humble is installed
-* TurtleBot4 workspace is properly built
-* Maps and parameter files exist under:
-
-  ```
-  ~/turtlebot4_ws/maps/
-  ```
-* YOLO model (`best.pt`) is available (make file via custom_yolo)
+* ROS2 Humble is installed.
+* The TurtleBot4 workspace is properly built.
+* Maps and parameter files exist under: `~/turtlebot4_ws/maps/`.
+* The YOLO model (`best.pt`) is available.
 
 ---
 
-### NavToPose (Manual)
+### 📍 NavToPose (Manual)
 
 This section describes **manual navigation testing** using Nav2.
-
-To run `NavToPose`, you need to launch `localization` and `navigation`, and set the initial pose.
 
 #### 1. Launch localization
 
 ```bash
-ros2 launch turtlebot4_navigation localization.launch.py   namespace:=/robot<n> map:=$HOME/turtlebot4_ws/maps/key_map.yaml params_file:=$HOME/turtlebot4_ws/maps/local2.yaml
+ros2 launch turtlebot4_navigation localization.launch.py namespace:=/robot<n> map:=$HOME/turtlebot4_ws/maps/key_map.yaml params_file:=$HOME/turtlebot4_ws/maps/local2.yaml
 ```
 
-This starts:
-
-* AMCL localization
-* Map server
-* TF tree under `/robot<n>`
-
----
+This starts AMCL localization, the Map server, and the TF tree under `/robot<n>`.
 
 #### 2. Set initial pose
 
-Launch RViz and set the initial pose manually.
+Launch RViz and use the **“2D Pose Estimate”** tool to align the robot with the map.
 
 ```bash
 ros2 launch turtlebot4_viz view_robot.launch.py namespace:=/robot<n>
 ```
-
-Use **“2D Pose Estimate”** in RViz to align the robot with the map.
-
----
 
 #### 3. Launch navigation
 
@@ -101,40 +80,15 @@ Use **“2D Pose Estimate”** in RViz to align the robot with the map.
 ros2 launch turtlebot4_navigation nav2.launch.py namespace:=/robot<n> params_file:=$HOME/turtlebot4_ws/maps/nav2_net2.yaml
 ```
 
-This launches:
-
-* Global planner
-* Local planner
-* Controller server
-* Behavior tree navigator
-
----
-
 #### 4. Send goal position
 
 ```bash
-ros2 action send_goal /robot<n>/navigate_to_pose nav2_msgs/action/NavigateToPose "
-pose:
-  header:
-    frame_id: map
-  pose:
-    position:
-      x: 2.3
-      y: 2.3
-      z: 0.0
-    orientation:
-      w: 1.0
-"
+ros2 action send_goal /robot<n>/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: 2.3, y: 2.3, z: 0.0}, orientation: {w: 1.0}}}}"
 ```
-
-This is useful for:
-
-* Verifying navigation stability
-* Testing obstacle avoidance before tracking
 
 ---
 
-### NavToPose (Script)
+### 🤖 NavToPose (Script)
 
 For convenience, the full Nav2 pipeline can be launched via a **single integrated script**.
 
@@ -142,16 +96,7 @@ For convenience, the full Nav2 pipeline can be launched via a **single integrate
 
 ```bash
 ./prep_checker.sh --n <n>
-# ex) robot1 -> ./prep_checker.sh --n 1
 ```
-
-This checks:
-
-* Namespace consistency
-* Required parameters
-* Environment setup
-
----
 
 #### 2. Run integrated launch file
 
@@ -164,17 +109,11 @@ ros2 launch turtlebot4_nav2pose nav2pose.launch.py \
   initial_x:=0.09 initial_y:=0.67 initial_yaw:=1.57
 ```
 
-This launch file:
-
-* Starts localization
-* Sets the initial pose automatically
-* Launches Nav2 navigation
-
 ---
 
-### Detection & Tracking
+### 🎯 Detection & Tracking
 
-This section runs the **core perception + tracking pipeline**.
+This runs the **core perception and tracking pipeline**.
 
 ```bash
 ros2 launch twocops_bringup twocops_bringup.launch.py robot_id:=3 \
@@ -184,53 +123,30 @@ ros2 launch twocops_bringup twocops_bringup.launch.py robot_id:=3 \
   robot_id:=3 partner_robot_id:=1
 ```
 
-**What this launch does:**
+**Key functions of this launch:**
 
-* Runs YOLO-based object detection on RGB images
-* Computes 3D position of the RC car using depth data
-* Converts target position into navigation or velocity commands
-* Continuously updates robot motion to follow the target
+* Performs YOLO-based object detection on RGB images.
+* Computes the 3D position of the RC car using depth data.
+* Converts target position into navigation or velocity commands.
+* Continuously updates robot motion to follow the target.
 
 ---
 
-## Multi-Robot Operation
+## 👥 Multi-Robot Operation
 
 To run **two robots simultaneously**:
 
-* Use different namespaces (`robot1`, `robot2`)
-* Launch all nodes separately per robot
-* Ensure each robot has its own TF tree and Nav2 stack
+* Use different namespaces (`robot1`, `robot2`).
+* Launch all nodes separately per robot.
+* Ensure each robot has its own TF tree and Nav2 stack.
 
-Example:
-
-```bash
-# Robot 1
-namespace:=robot1
-
-# Robot 2
-namespace:=robot2
-```
-
-Both robots can track the same RC car independently, enabling:
-
-* Redundant perception
-* Comparative tracking behavior
-* Future cooperative strategies
+Both robots can track the same RC car independently, enabling redundant perception and comparative tracking behavior.
 
 ---
 
-## Notes & Limitations
+## ⚠️ Notes & Limitations
 
-* Current tracking is **independent per robot** (no inter-robot communication)
-* Target loss handling depends on YOLO detection confidence
-* Depth accuracy is affected by lighting and surface reflectivity
-* Dynamic obstacle avoidance relies on Nav2 configuration
-
----
-
-## Future Work
-
-* Cooperative tracking and target handoff
-* Multi-view sensor fusion
-* Centralized target estimation
-* Behavior-based pursuit strategies
+* Tracking is currently **independent per robot** with no inter-robot communication.
+* Target loss handling depends on YOLO detection confidence.
+* Depth accuracy is affected by lighting and surface reflectivity.
+* Dynamic obstacle avoidance relies on your specific Nav2 configuration.
