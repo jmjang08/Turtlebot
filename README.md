@@ -6,6 +6,7 @@
 
 ## 🎬 Demo Video
 [![TIAGo Delivery Robot Demo](https://img.youtube.com/vi/IdMPBq4QXjY/0.jpg)](https://www.youtube.com/watch?v=IdMPBq4QXjY)
+> **Click the image above to watch the full demonstration video on YouTube.**
 
 ## 📝 Overview
 
