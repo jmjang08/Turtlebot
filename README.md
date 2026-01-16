@@ -3,6 +3,10 @@
 > Rokey Bootcamp Turtlebot Project | 🗓️: 2025.11.10 ~ 2025.11.21 <br>
 > Original Repository: 
 [Rokey-C1/turtlebot4_ws](https://github.com/Rokey-C1/turtlebot4_ws) & [Rokey-C1/twocops_monitoring](https://github.com/Rokey-C1/twocops_monitoring)
+
+## 🎬 Demo Video
+[![Two Cops Demo](https://img.youtube.com/vi/IdMPBq4QXjY0.jpg)](https://www.youtube.com/watch?v=IdMPBq4QXjY)
+
 ## 📝 Overview
 
 **Two Cops** is a multi-robot tracking project. It features **two TurtleBot4 robots equipped with depth cameras (OAK-D) and LIDAR sensors that collaboratively track a moving RC car** in an indoor environment.
